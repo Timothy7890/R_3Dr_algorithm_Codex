@@ -1,0 +1,4 @@
+# Install Nerfstudio in its supported Python environment first. The package
+# pins CUDA/PyTorch versions and should not be mixed with the service runtime.
+nerfstudio>=1.1,<2.0
+open3d>=0.18,<1.0
