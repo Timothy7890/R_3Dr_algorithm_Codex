@@ -129,11 +129,11 @@ def reconstruct_video(config: ReconstructionConfig, callback: ProgressCallback |
         "preparing",
     )
 
-    _emit(callback, "training", 20, "Training Nerfacto model")
+    _emit(callback, "training", 20, "Training Splatfacto model")
     _run(
         [
             config.nerfstudio_train_command,
-            "nerfacto",
+            "splatfacto",
             "--data",
             str(data_dir),
             "--output-dir",
