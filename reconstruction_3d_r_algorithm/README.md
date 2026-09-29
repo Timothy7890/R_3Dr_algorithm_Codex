@@ -3,7 +3,7 @@
 这个目录是独立运行的三维重建算法适配器，不修改仓库其他服务。它通过 Nerfstudio 官方命令行完成：
 
 1. `ns-process-data video`：从视频抽帧并估计相机姿态。
-2. `ns-train nerfacto`：训练 Nerfacto 场景模型。
+2. `ns-train splatfacto`：训练 Splatfacto 场景模型。
 3. `ns-export pointcloud`：导出 PLY 点云。
 4. 当输出路径以 `.pcd` 或 `.txt` 结尾时，用 Open3D 读取 PLY 并转换格式。
 
