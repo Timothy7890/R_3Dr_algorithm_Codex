@@ -2,6 +2,7 @@ import io
 import sys
 import types
 import unittest
+from contextlib import ExitStack
 from pathlib import Path
 from unittest.mock import patch
 
@@ -25,19 +26,21 @@ class PipelineTests(unittest.TestCase):
                 return [path / "point_cloud.ply"]
             return []
 
-        with (
-            patch.object(Path, "is_file", return_value=True),
-            patch.object(Path, "mkdir"),
-            patch.object(Path, "rglob", side_effect=configs, autospec=True),
-            patch("reconstruction_3d_r_algorithm.pipeline._run", side_effect=lambda command, *_: commands.append(list(command))),
-            patch("reconstruction_3d_r_algorithm.pipeline.shutil.copy2") as copy,
-        ):
+        with ExitStack() as stack:
+            stack.enter_context(patch.object(Path, "is_file", return_value=True))
+            stack.enter_context(patch.object(Path, "mkdir"))
+            stack.enter_context(patch.object(Path, "rglob", side_effect=configs, autospec=True))
+            stack.enter_context(patch(
+                "reconstruction_3d_r_algorithm.pipeline._run",
+                side_effect=lambda command, *_: commands.append(list(command)),
+            ))
+            copy = stack.enter_context(patch("reconstruction_3d_r_algorithm.pipeline.shutil.copy2"))
             actual = reconstruct_video(ReconstructionConfig(root / "input.mp4", output, max_iterations=100, num_points=10))
 
         self.assertEqual(actual, output.resolve())
         self.assertEqual(copy.call_args.args[1], output.resolve())
         self.assertEqual([command[:2] for command in commands], [
-            ["ns-process-data", "video"], ["ns-train", "nerfacto"], ["ns-export", "pointcloud"]
+            ["ns-process-data", "video"], ["ns-train", "splatfacto"], ["ns-export", "pointcloud"]
         ])
         self.assertIn("--load-config", commands[2])
 
@@ -66,12 +69,11 @@ class PipelineTests(unittest.TestCase):
                 pass
 
         stream = CapturedText()
-        with (
-            patch.dict(sys.modules, {"open3d": fake_open3d}),
-            patch.object(Path, "open", return_value=stream),
-            patch.object(Path, "replace") as replace,
-            patch.object(Path, "unlink"),
-        ):
+        with ExitStack() as stack:
+            stack.enter_context(patch.dict(sys.modules, {"open3d": fake_open3d}))
+            stack.enter_context(patch.object(Path, "open", return_value=stream))
+            replace = stack.enter_context(patch.object(Path, "replace"))
+            stack.enter_context(patch.object(Path, "unlink"))
             _save_point_cloud(Path("source.ply"), Path("result.txt"))
 
         self.assertEqual(stream.getvalue(), "1 2 3 0.2 0.4 0.6\n4 5 6 0.7 0.8 0.9\n")
@@ -84,11 +86,10 @@ class PipelineTests(unittest.TestCase):
             read_point_cloud=lambda _: cloud,
             write_point_cloud=lambda path, value: writes.append((path, value)) or True,
         ))
-        with (
-            patch.dict(sys.modules, {"open3d": fake_open3d}),
-            patch.object(Path, "replace") as replace,
-            patch.object(Path, "unlink"),
-        ):
+        with ExitStack() as stack:
+            stack.enter_context(patch.dict(sys.modules, {"open3d": fake_open3d}))
+            replace = stack.enter_context(patch.object(Path, "replace"))
+            stack.enter_context(patch.object(Path, "unlink"))
             _save_point_cloud(Path("source.ply"), Path("result.pcd"))
 
         self.assertEqual(writes, [("result.tmp.pcd", cloud)])
