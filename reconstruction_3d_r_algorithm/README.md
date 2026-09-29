@@ -34,7 +34,7 @@ python reconstruction_3d_r_algorithm/pipeline.py `
 程序会在标准输出打印 JSON 进度事件，例如：
 
 ```json
-{"stage":"training","progress":20,"message":"Training Nerfacto model"}
+{"stage":"training","progress":20,"message":"Training Splatfacto model"}
 ```
 
 这类事件可以由上层计算节点转发到现有控制面。

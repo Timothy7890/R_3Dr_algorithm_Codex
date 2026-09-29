@@ -195,7 +195,11 @@ def main() -> int:
     parser.add_argument("--work-dir", type=Path)
     parser.add_argument("--max-iterations", type=int, default=30_000)
     parser.add_argument("--num-points", type=int, default=1_000_000)
-    parser.add_argument("--keep-intermediate", action=argparse.BooleanOptionalAction, default=True)
+    # BooleanOptionalAction was added in Python 3.9. Keep equivalent flags
+    # explicit so the CLI also works in the Python 3.8 Nerfstudio environment.
+    parser.add_argument("--keep-intermediate", dest="keep_intermediate", action="store_true")
+    parser.add_argument("--no-keep-intermediate", dest="keep_intermediate", action="store_false")
+    parser.set_defaults(keep_intermediate=True)
     args = parser.parse_args()
     config = ReconstructionConfig(
         video_path=args.video,
