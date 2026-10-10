@@ -12,6 +12,11 @@ class Settings(BaseSettings):
     max_upload_bytes: int = 20 * 1024 * 1024 * 1024
     callback_timeout_seconds: float = 30.0
     cors_origins: str = ""
+    algo_env: Path = Path("/root/miniconda3/envs/plantsegnerf_pp")
+    frames_script: Path = Path(
+        "/g12213021yx/Xin_Yang/project/my-project/PNPP/pnpp/osplantsegneRF/c_Frames_pp/get_frames_sharp.py"
+    )
+    frames_count: int = 100
 
     model_config = SettingsConfigDict(env_prefix="COMPUTE_", env_file=".env", extra="ignore")
 

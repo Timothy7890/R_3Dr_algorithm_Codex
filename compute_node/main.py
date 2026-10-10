@@ -6,7 +6,7 @@ import logging
 import re
 from contextlib import asynccontextmanager, suppress
 from pathlib import Path
-from typing import Dict, Set, Tuple
+from typing import Dict, Optional, Set, Tuple
 from urllib.parse import urlparse
 from datetime import datetime
 
@@ -17,6 +17,7 @@ from common.filenames import safe_filename
 
 from .config import Settings, get_settings
 from .processor import (
+    PLANT_YOLO_INI,
     PROCESSING_PROGRESS_MIN,
     default_output_path,
     map_reconstruction_progress,
@@ -111,6 +112,7 @@ async def process_job(
     input_path: Path,
     callback_url: str,
     progress_url: str,
+    plant: Optional[str] = None,
 ) -> None:
     global active_jobs
     output_path = default_output_path(input_path)
@@ -158,6 +160,7 @@ async def process_job(
             input_path=input_path,
             output_path=output_path,
             progress_callback=report_reconstruction_progress,
+            plant=plant,
         )
         await post_progress(client, progress_url, task_id, "PACKAGING", 90, "result packaging", settings.node_id)
         await post_result(client, callback_url, task_id, output_path)
@@ -209,11 +212,15 @@ async def create_job(
     video: UploadFile = File(...),
     callback_url: str = Form(...),
     progress_url: str = Form(...),
+    plant: Optional[str] = Form(None),
 ) -> Dict[str, object]:
     global active_jobs
     if not TASK_ID_PATTERN.fullmatch(task_id):
         await video.close()
         raise HTTPException(status_code=422, detail="invalid task_id")
+    if plant and plant not in PLANT_YOLO_INI:
+        await video.close()
+        raise HTTPException(status_code=422, detail="invalid plant")
     validate_callback_url(callback_url, "callback_url")
     validate_callback_url(progress_url, "progress_url")
     task_dir = settings.storage_root / task_id
@@ -240,7 +247,7 @@ async def create_job(
         raise
 
     asyncio.create_task(
-        process_job(task_id, input_path, callback_url, progress_url)
+        process_job(task_id, input_path, callback_url, progress_url, plant)
     )
     return {
         "task_id": task_id,
