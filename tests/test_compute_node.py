@@ -46,6 +46,8 @@ class ComputeProcessorTests(unittest.IsolatedAsyncioTestCase):
         command = pipeline_command(settings, job, "903_YOLO26.ini")
         self.assertEqual(command[:5], ["/env/bin/psn_pipeline_cuda", "-i", "/xxxx/yyyy", "-L", "1"])
         self.assertIn("--no_show", command)
+        self.assertIn("--parallel-sfm-yolo", command)
+        self.assertIn("--sfm-orbit-z", command)
         self.assertNotIn("--nerf-viewer", command)
         self.assertEqual(command[command.index("--ini") + 1], "903_YOLO26.ini")
 

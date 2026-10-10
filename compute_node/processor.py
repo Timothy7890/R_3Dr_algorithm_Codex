@@ -70,6 +70,8 @@ def pipeline_command(settings: Settings, job_dir: Path, ini: str) -> List[str]:
         "--nerf-export-save-world-frame",
         "--nerf-no-export-save-nerfstudio-frame",
         "--sfm-aabb-scale", "4",
+        "--parallel-sfm-yolo",
+        "--sfm-orbit-z",
         "--ini", ini,
         "--no_show",
     ]
