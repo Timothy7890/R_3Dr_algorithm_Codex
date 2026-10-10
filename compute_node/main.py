@@ -1,24 +1,34 @@
+from __future__ import annotations
+
 import asyncio
 import hashlib
 import logging
 import re
 from contextlib import asynccontextmanager, suppress
 from pathlib import Path
+from typing import Dict, Set, Tuple
 from urllib.parse import urlparse
 from datetime import datetime
 
 import httpx
 from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, UploadFile, status
 
+from common.filenames import safe_filename
+
 from .config import Settings, get_settings
-from .processor import run_reconstruction
+from .processor import (
+    PROCESSING_PROGRESS_MIN,
+    default_output_path,
+    map_reconstruction_progress,
+    run_reconstruction,
+)
 
 
 settings = get_settings()
 logger = logging.getLogger(__name__)
 active_jobs = 0
 jobs_lock = asyncio.Lock()
-running_tasks: set[str] = set()
+running_tasks: Set[str] = set()
 TASK_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$")
 
 
@@ -34,7 +44,7 @@ def validate_callback_url(value: str, field_name: str) -> str:
     return value
 
 
-async def save_upload(file: UploadFile, destination: Path) -> tuple[int, str]:
+async def save_upload(file: UploadFile, destination: Path) -> Tuple[int, str]:
     destination.parent.mkdir(parents=True, exist_ok=True)
     temporary = destination.with_suffix(destination.suffix + ".part")
     size = 0
@@ -103,12 +113,53 @@ async def process_job(
     progress_url: str,
 ) -> None:
     global active_jobs
-    output_path = input_path.parent / "result-placeholder.txt"
+    output_path = default_output_path(input_path)
     client = app.state.client
     try:
         await post_progress(client, progress_url, task_id, "PROCESSING", 30, "processing", settings.node_id)
-        await run_reconstruction(input_path, output_path)
-        await post_progress(client, progress_url, task_id, "PACKAGING", 80, "packaging", settings.node_id)
+        event_loop = asyncio.get_running_loop()
+        last_reported_progress = PROCESSING_PROGRESS_MIN
+        last_reported_stage = "processing"
+
+        def report_reconstruction_progress(stage: str, progress: float, message: str) -> None:
+            nonlocal last_reported_progress, last_reported_stage
+            mapped_progress = map_reconstruction_progress(progress)
+            current_stage = stage
+            if mapped_progress < last_reported_progress:
+                return
+            if mapped_progress == last_reported_progress and current_stage == last_reported_stage:
+                return
+            last_reported_progress = mapped_progress
+            last_reported_stage = current_stage
+            logger.info(
+                "Reconstruction progress: task_id=%s pipeline_stage=%s pipeline_progress=%s "
+                "progress=%s message=%s",
+                task_id,
+                stage,
+                progress,
+                mapped_progress,
+                message,
+            )
+            future = asyncio.run_coroutine_threadsafe(
+                post_progress(
+                    client,
+                    progress_url,
+                    task_id,
+                    "PROCESSING",
+                    mapped_progress,
+                    current_stage,
+                    settings.node_id,
+                ),
+                event_loop,
+            )
+            future.result()
+
+        await run_reconstruction(
+            input_path=input_path,
+            output_path=output_path,
+            progress_callback=report_reconstruction_progress,
+        )
+        await post_progress(client, progress_url, task_id, "PACKAGING", 90, "result packaging", settings.node_id)
         await post_result(client, callback_url, task_id, output_path)
         (input_path.parent / ".complete").touch()
     except Exception as exc:
@@ -142,7 +193,7 @@ app = FastAPI(title="3D Reconstruction Compute Node", version="0.1.0", lifespan=
 
 
 @app.get("/health")
-def health() -> dict[str, object]:
+def health() -> Dict[str, object]:
     return {
         "status": "ok",
         "node_id": settings.node_id,
@@ -158,7 +209,7 @@ async def create_job(
     video: UploadFile = File(...),
     callback_url: str = Form(...),
     progress_url: str = Form(...),
-) -> dict[str, object]:
+) -> Dict[str, object]:
     global active_jobs
     if not TASK_ID_PATTERN.fullmatch(task_id):
         await video.close()
@@ -166,7 +217,7 @@ async def create_job(
     validate_callback_url(callback_url, "callback_url")
     validate_callback_url(progress_url, "progress_url")
     task_dir = settings.storage_root / task_id
-    input_path = task_dir / "input.bin"
+    input_path = task_dir / safe_filename(video.filename)
     print(datetime.now());
     print(f"receive_job: task_id:{task_id}, callback_url:{callback_url}");
 
@@ -188,12 +239,19 @@ async def create_job(
             active_jobs -= 1
         raise
 
-    asyncio.create_task(process_job(task_id, input_path, callback_url, progress_url))
-    return {"task_id": task_id, "accepted": True, "size": size, "sha256": sha256}
+    asyncio.create_task(
+        process_job(task_id, input_path, callback_url, progress_url)
+    )
+    return {
+        "task_id": task_id,
+        "accepted": True,
+        "size": size,
+        "sha256": sha256,
+    }
 
 
 @app.get("/")
-def root() -> dict[str, str]:
+def root() -> Dict[str, str]:
     return {
         "service": "3D Reconstruction Compute Node",
         "status": "ok",

@@ -1,6 +1,0 @@
-.viewer-state{min-width:min(380px,calc(100% - 40px))}
-.viewer-progress-list{display:grid;gap:12px;margin-top:17px;text-align:left}
-.viewer-progress-item>div:first-child{display:flex;justify-content:space-between;gap:12px;color:#9eb5c5;font-size:11px}
-.viewer-progress-item b{color:#cce2ee;font:500 11px ui-monospace,monospace;font-variant-numeric:tabular-nums}
-.viewer-load-progress{height:6px;margin-top:6px;overflow:hidden;border-radius:5px;background:rgba(145,168,186,.16)}
-.viewer-load-progress i{display:block;width:0;height:100%;border-radius:inherit;background:linear-gradient(90deg,#43d9d0,#4a8dff);transition:width .16s ease}
