@@ -169,6 +169,7 @@ ssh -N -p 30952 -L 127.0.0.1:14002:127.0.0.1:14000 -R 127.0.0.1:13001:127.0.0.1:
 - `tomato`（番茄）→ `20260411-Tomato-006.ini`
 - `eggplant`（茄子）→ `20261020-eggplant-class.ini`
 - `pepper`（辣椒）→ `20260720-lajiao.ini`
+- `rapeseed`（油菜）→ `903_YOLO26.ini`
 
 映射后的文件名传入 `psn_pipeline_cuda --ini`。算法按名字解析配置，所以不传绝对路径；这些 ini 必须已存在于计算服务器上算法使用的配置目录。
 

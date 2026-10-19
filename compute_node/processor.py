@@ -24,6 +24,7 @@ PLANT_YOLO_INI = {
     "eggplant": "20261020-eggplant-class.ini",
     "yinxing": "20260323-yinxing.ini",
     "tomato": "20260411-Tomato-006.ini",
+    "rapeseed": "903_YOLO26.ini",
 }
 
 

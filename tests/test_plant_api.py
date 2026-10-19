@@ -18,6 +18,7 @@ class PlantApiTests(unittest.IsolatedAsyncioTestCase):
             ({"plant_type": "tomato", "yolo_ini": "20260411-Tomato-006.ini"}, "20260411-Tomato-006.ini"),
             ({"plant_type": "eggplant", "yolo_ini": "20261020-eggplant-class.ini"}, "20261020-eggplant-class.ini"),
             ({"plant_type": "pepper", "yolo_ini": "20260720-lajiao.ini"}, "20260720-lajiao.ini"),
+            ({"plant_type": "rapeseed", "yolo_ini": "903_YOLO26.ini"}, "903_YOLO26.ini"),
             ({"plant": "lajiao"}, "20260720-lajiao.ini"),
             ({"plant": "yinxing"}, "20260323-yinxing.ini"),
             ({"plant": "lajiao", "plant_type": "pepper"}, "20260720-lajiao.ini"),
