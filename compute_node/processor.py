@@ -19,7 +19,9 @@ PROCESSING_PROGRESS_MAX = 90
 DEFAULT_YOLO_INI = "903_YOLO26.ini"
 # psn_pipeline_cuda resolves --ini by name; a full path breaks it.
 PLANT_YOLO_INI = {
-    "lajiao": "20260720-lajiao.ini",
+    "lajiao": "20260720-lajiao.ini",  # Legacy API name.
+    "pepper": "20260720-lajiao.ini",
+    "eggplant": "20261020-eggplant-class.ini",
     "yinxing": "20260323-yinxing.ini",
     "tomato": "20260411-Tomato-006.ini",
 }

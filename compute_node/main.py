@@ -22,6 +22,7 @@ from .processor import (
     default_output_path,
     map_reconstruction_progress,
     run_reconstruction,
+    yolo_ini as resolve_yolo_ini,
 )
 
 
@@ -213,6 +214,8 @@ async def create_job(
     callback_url: str = Form(...),
     progress_url: str = Form(...),
     plant: Optional[str] = Form(None),
+    plant_type: Optional[str] = Form(None),
+    yolo_ini: Optional[str] = Form(None),
 ) -> Dict[str, object]:
     global active_jobs
     if not TASK_ID_PATTERN.fullmatch(task_id):
@@ -221,6 +224,17 @@ async def create_job(
     if plant and plant not in PLANT_YOLO_INI:
         await video.close()
         raise HTTPException(status_code=422, detail="invalid plant")
+    # Accept the control/transfer service field while retaining older clients.
+    if plant_type is not None and plant_type not in PLANT_YOLO_INI:
+        await video.close()
+        raise HTTPException(status_code=422, detail="invalid plant_type")
+    if plant and plant_type and resolve_yolo_ini(plant) != resolve_yolo_ini(plant_type):
+        await video.close()
+        raise HTTPException(status_code=422, detail="plant and plant_type disagree")
+    plant = plant_type or plant
+    if yolo_ini is not None and yolo_ini != resolve_yolo_ini(plant):
+        await video.close()
+        raise HTTPException(status_code=422, detail="yolo_ini does not match selected plant")
     validate_callback_url(callback_url, "callback_url")
     validate_callback_url(progress_url, "progress_url")
     task_dir = settings.storage_root / task_id

@@ -158,3 +158,20 @@ ssh -N -p 30952 -L 127.0.0.1:14001:127.0.0.1:14000 dky_YX(alias in .ssh/config )
 ssh -N -p 30952 -L 127.0.0.1:14001:127.0.0.1:14000 -R 127.0.0.1:13001:127.0.0.1:13001 -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 -o ServerAliveCountMax=3 dky_YX
 ssh -N -p 30952 -L 127.0.0.1:14002:127.0.0.1:14000 -R 127.0.0.1:13001:127.0.0.1:13001 -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 -o ServerAliveCountMax=3 dky_YX2
 ```
+
+
+## 实际算法入口与作物参数
+
+本项目是独立部署的真实计算节点，`compute_node/processor.py` 会执行抽帧与 `psn_pipeline_cuda`；更新计算服务器时应更新本仓库，不能只更新 `transfer_service` 中的示例计算节点。
+
+`POST /internal/jobs/{task_id}` 接收中转节点发送的 `plant_type` 和可选 `yolo_ini` 表单字段：
+
+- `tomato`（番茄）→ `20260411-Tomato-006.ini`
+- `eggplant`（茄子）→ `20261020-eggplant-class.ini`
+- `pepper`（辣椒）→ `20260720-lajiao.ini`
+
+映射后的文件名传入 `psn_pipeline_cuda --ini`。算法按名字解析配置，所以不传绝对路径；这些 ini 必须已存在于计算服务器上算法使用的配置目录。
+
+兼容旧 `plant` 字段和 `lajiao`、`yinxing` 取值。两个作物字段同时出现且指向不同配置，或 `yolo_ini` 与服务端映射不符时，返回 422。没有任何作物选择的旧请求仍使用 `903_YOLO26.ini`。
+
+更新本项目并重启实际计算服务后，新参数才会生效。测试会模拟算法子进程，不运行真实 GPU 推理。
