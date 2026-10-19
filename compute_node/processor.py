@@ -25,6 +25,7 @@ PLANT_YOLO_INI = {
     "yinxing": "20260323-yinxing.ini",
     "tomato": "20260411-Tomato-006.ini",
     "rapeseed": "903_YOLO26.ini",
+    "tomato_new": "20261020-Tomato-CEN-fewshot.ini",
 }
 
 
