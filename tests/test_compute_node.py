@@ -76,6 +76,7 @@ class ComputeProcessorTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(ignored, ["reexport", "retrain", "yolo"])
         self.assertEqual(rgb_only[rgb_only.index("--sfm-aabb-scale") + 1], "4")
         self.assertIn("--sfm-camera-aabb", rgb_only)
+        self.assertIn("--sfm-normalize-camera-scale", rgb_only)
         self.assertEqual(parse_pipeline_line("Stage1-RGB:  50%|#####     | 2500/5000"), ("nerf_stage1", 0.5))
 
     async def test_run_reconstruction_runs_both_steps(self):
