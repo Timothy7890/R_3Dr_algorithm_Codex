@@ -70,6 +70,7 @@ class PlantApiTests(unittest.IsolatedAsyncioTestCase):
                             self.assertEqual(pipeline[pipeline.index("--sfm-aabb-scale") + 1], "4")
                             self.assertEqual("--sfm-camera-aabb" in pipeline, reconstruction_only)
                             self.assertEqual("--sfm-normalize-camera-scale" in pipeline, reconstruction_only)
+                            self.assertEqual("--nerf-export-subject-crop" in pipeline, reconstruction_only)
 
     async def test_bad_selection_is_rejected_before_algorithm_runs(self):
         cases = [
