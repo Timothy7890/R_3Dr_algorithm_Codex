@@ -68,6 +68,7 @@ class PlantApiTests(unittest.IsolatedAsyncioTestCase):
                             self.assertEqual(pipeline[pipeline.index("--nerf-stage2-steps") + 1], "0" if reconstruction_only else "4000")
                             self.assertEqual("yolo" in pipeline, reconstruction_only)
                             self.assertEqual(pipeline[pipeline.index("--sfm-aabb-scale") + 1], "1" if reconstruction_only else "4")
+                            self.assertEqual("--sfm-camera-aabb" in pipeline, reconstruction_only)
 
     async def test_bad_selection_is_rejected_before_algorithm_runs(self):
         cases = [
