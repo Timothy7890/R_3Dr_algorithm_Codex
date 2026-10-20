@@ -80,7 +80,7 @@ def pipeline_command(settings: Settings, job_dir: Path, ini: str, segment: bool 
         "--use-legacy-leiden",
         "--nerf-export-save-world-frame",
         "--nerf-no-export-save-nerfstudio-frame",
-        "--sfm-aabb-scale", "4",
+        "--sfm-aabb-scale", "4" if segment else "16",
         *([] if segment else ["--sfm-camera-aabb", "--sfm-normalize-camera-scale", "--nerf-export-subject-crop"]),
         "--parallel-sfm-yolo",
         "--sfm-orbit-z",
