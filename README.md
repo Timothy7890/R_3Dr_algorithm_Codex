@@ -171,7 +171,7 @@ ssh -N -p 30952 -L 127.0.0.1:14002:127.0.0.1:14000 -R 127.0.0.1:13001:127.0.0.1:
 - `pepper`（辣椒）→ `20260720-lajiao.ini`
 - `rapeseed`（油菜）→ `903_YOLO26.ini`
 - `tomato_new`（番茄；原“番茄-新”）→ `20261020-Tomato-CEN-fewshot.ini`
-- `other`（其他植物，仅重建不分割）→ `--nerf-stage2-steps 0 --rgb-only --sfm-aabb-scale 1 --sfm-camera-aabb`（其余作物为 `--sfm-aabb-scale 4`，不加 `--sfm-camera-aabb`；该开关由相机外参求出位于环绕相机内部的训练立方体，写入 `transforms.json` 的 `aabb`，需要 PlantsegNeRF 包含 `RUN_pp/camera_aabb.py`），`--ignore` 增加 `yolo`；`--ini` 仍传 `903_YOLO26.ini`，但不会被读取
+- `other`（其他植物，仅重建不分割）→ `--nerf-stage2-steps 0 --rgb-only --sfm-camera-aabb`（训练区域与其余作物相同，均为 `--sfm-aabb-scale 4`，背景一起训练；`--sfm-camera-aabb` 由相机外参求出位于环绕相机内部的立方体，写入 `transforms.json` 的 `export_aabb`，导出点云时只保留框内的点，总点数不变；需要 PlantsegNeRF 包含 `RUN_pp/camera_aabb.py`），`--ignore` 增加 `yolo`；`--ini` 仍传 `903_YOLO26.ini`，但不会被读取
 
 映射后的文件名传入 `psn_pipeline_cuda --ini`。算法按名字解析配置，所以不传绝对路径；这些 ini 必须已存在于计算服务器上算法使用的配置目录。
 
