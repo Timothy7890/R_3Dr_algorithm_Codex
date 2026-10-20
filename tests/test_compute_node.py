@@ -68,6 +68,13 @@ class ComputeProcessorTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("--sfm-orbit-z", command)
         self.assertNotIn("--nerf-viewer", command)
         self.assertEqual(command[command.index("--ini") + 1], "903_YOLO26.ini")
+        rgb_only = pipeline_command(settings, job, "903_YOLO26.ini", segment=False)
+        self.assertEqual(rgb_only[rgb_only.index("--nerf-stage1-steps") + 1], "5000")
+        self.assertEqual(rgb_only[rgb_only.index("--nerf-stage2-steps") + 1], "0")
+        self.assertIn("--rgb-only", rgb_only)
+        ignored = rgb_only[rgb_only.index("--ignore") + 1:rgb_only.index("--use-legacy-leiden")]
+        self.assertEqual(ignored, ["reexport", "retrain", "yolo"])
+        self.assertEqual(parse_pipeline_line("Stage1-RGB:  50%|#####     | 2500/5000"), ("nerf_stage1", 0.5))
 
     async def test_run_reconstruction_runs_both_steps(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -26,7 +26,11 @@ PLANT_YOLO_INI = {
     "tomato": "20260411-Tomato-006.ini",
     "rapeseed": "903_YOLO26.ini",
     "tomato_new": "20261020-Tomato-CEN-fewshot.ini",
+    # Reconstruction only: YOLO is skipped, so the ini is never read but --ini is still required.
+    "other": DEFAULT_YOLO_INI,
 }
+# Plants reconstructed as RGB only, without semantic/instance segmentation.
+RECONSTRUCTION_ONLY = {"other"}
 
 
 def map_reconstruction_progress(progress: float) -> int:
@@ -64,14 +68,15 @@ def frames_command(settings: Settings, job_dir: Path) -> List[str]:
     ]
 
 
-def pipeline_command(settings: Settings, job_dir: Path, ini: str) -> List[str]:
+def pipeline_command(settings: Settings, job_dir: Path, ini: str, segment: bool = True) -> List[str]:
     return [
         str(settings.algo_env / "bin" / "psn_pipeline_cuda"),
         "-i", str(job_dir),
         "-L", "1",
         "--nerf-stage1-steps", "5000",
-        "--nerf-stage2-steps", "4000",
-        "--ignore", "reexport", "retrain",
+        "--nerf-stage2-steps", "4000" if segment else "0",
+        *([] if segment else ["--rgb-only"]),
+        "--ignore", "reexport", "retrain", *([] if segment else ["yolo"]),
         "--use-legacy-leiden",
         "--nerf-export-save-world-frame",
         "--nerf-no-export-save-nerfstudio-frame",
@@ -94,7 +99,8 @@ STAGE_RANGES = {
 STAGE_ORDER = list(STAGE_RANGES)
 
 _TRAIN_BARS = (
-    (re.compile(r"Stage1-RGB\+Sem:.*?\|\s*(\d+)/(\d+)"), "nerf_stage1"),
+    # "Stage1-RGB+Sem" normally, "Stage1-RGB" with --rgb-only.
+    (re.compile(r"Stage1-RGB(?:\+Sem)?:.*?\|\s*(\d+)/(\d+)"), "nerf_stage1"),
     (re.compile(r"Stage2-Instance:.*?\|\s*(\d+)/(\d+)"), "nerf_stage2"),
 )
 
@@ -187,6 +193,7 @@ def _reconstruct(
     output_path: Path,
     ini: str,
     progress_callback: Optional[ProgressCallback],
+    segment: bool = True,
 ) -> None:
     def report(stage: str, progress: float, message: str) -> None:
         if progress_callback:
@@ -205,7 +212,7 @@ def _reconstruct(
     report("sfm_and_segmentation", stage_progress("sfm_and_segmentation", 0), f"psn_pipeline_cuda --ini {ini}")
     _run_step(
         "pipeline",
-        pipeline_command(settings, job_dir, ini),
+        pipeline_command(settings, job_dir, ini, segment),
         job_dir,
         env,
         on_stage=lambda stage, progress: report(stage, progress, stage),
@@ -229,5 +236,6 @@ async def run_reconstruction(
     ini = yolo_ini(plant)
     loop = asyncio.get_running_loop()
     await loop.run_in_executor(
-        None, _reconstruct, get_settings(), input_path, output_path, ini, progress_callback
+        None, _reconstruct, get_settings(), input_path, output_path, ini, progress_callback,
+        plant not in RECONSTRUCTION_ONLY,
     )

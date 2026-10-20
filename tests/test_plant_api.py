@@ -20,6 +20,7 @@ class PlantApiTests(unittest.IsolatedAsyncioTestCase):
             ({"plant_type": "pepper", "yolo_ini": "20260720-lajiao.ini"}, "20260720-lajiao.ini"),
             ({"plant_type": "rapeseed", "yolo_ini": "903_YOLO26.ini"}, "903_YOLO26.ini"),
             ({"plant_type": "tomato_new", "yolo_ini": "20261020-Tomato-CEN-fewshot.ini"}, "20261020-Tomato-CEN-fewshot.ini"),
+            ({"plant_type": "other", "yolo_ini": "903_YOLO26.ini"}, "903_YOLO26.ini"),
             ({"plant": "lajiao"}, "20260720-lajiao.ini"),
             ({"plant": "yinxing"}, "20260323-yinxing.ini"),
             ({"plant": "lajiao", "plant_type": "pepper"}, "20260720-lajiao.ini"),
@@ -62,6 +63,10 @@ class PlantApiTests(unittest.IsolatedAsyncioTestCase):
                             pipeline = commands[-1]
                             self.assertEqual(pipeline[pipeline.index("--ini") + 1], expected_ini)
                             self.assertFalse(Path(expected_ini).is_absolute())
+                            reconstruction_only = fields.get("plant_type") == "other"
+                            self.assertEqual("--rgb-only" in pipeline, reconstruction_only)
+                            self.assertEqual(pipeline[pipeline.index("--nerf-stage2-steps") + 1], "0" if reconstruction_only else "4000")
+                            self.assertEqual("yolo" in pipeline, reconstruction_only)
 
     async def test_bad_selection_is_rejected_before_algorithm_runs(self):
         cases = [

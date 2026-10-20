@@ -166,11 +166,12 @@ ssh -N -p 30952 -L 127.0.0.1:14002:127.0.0.1:14000 -R 127.0.0.1:13001:127.0.0.1:
 
 `POST /internal/jobs/{task_id}` 接收中转节点发送的 `plant_type` 和可选 `yolo_ini` 表单字段：
 
-- `tomato`（番茄）→ `20260411-Tomato-006.ini`
+- `tomato`（旧版番茄，界面已隐藏，仍接受旧请求）→ `20260411-Tomato-006.ini`
 - `eggplant`（茄子）→ `20261020-eggplant-class.ini`
 - `pepper`（辣椒）→ `20260720-lajiao.ini`
 - `rapeseed`（油菜）→ `903_YOLO26.ini`
-- `tomato_new`（番茄-新）→ `20261020-Tomato-CEN-fewshot.ini`
+- `tomato_new`（番茄；原“番茄-新”）→ `20261020-Tomato-CEN-fewshot.ini`
+- `other`（其他植物，仅重建不分割）→ `--nerf-stage2-steps 0 --rgb-only`，`--ignore` 增加 `yolo`；`--ini` 仍传 `903_YOLO26.ini`，但不会被读取
 
 映射后的文件名传入 `psn_pipeline_cuda --ini`。算法按名字解析配置，所以不传绝对路径；这些 ini 必须已存在于计算服务器上算法使用的配置目录。
 
