@@ -24,7 +24,7 @@ PLANT_YOLO_INI = {
     "eggplant": "20261020-eggplant-class.ini",
     "yinxing": "20260323-yinxing.ini",
     "tomato": "20260411-Tomato-006.ini",
-    "rapeseed": "903_YOLO26.ini",
+    "rapeseed": "20260526-rapeseed.ini",
     "tomato_new": "20261020-Tomato-CEN-fewshot.ini",
     # Reconstruction only: YOLO is skipped, so the ini is never read but --ini is still required.
     "other": DEFAULT_YOLO_INI,
