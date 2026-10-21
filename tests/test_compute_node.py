@@ -78,6 +78,8 @@ class ComputeProcessorTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(rgb_only[rgb_only.index("--sfm-aabb-scale") + 1], "16")
         self.assertIn("--sfm-camera-aabb", rgb_only)
         self.assertIn("--sfm-normalize-camera-scale", rgb_only)
+        self.assertIn("--sfm-normalize-camera-scale", command)
+        self.assertIn("--nerf-export-save-world-frame", command)
         self.assertIn("--nerf-export-subject-crop", rgb_only)
         self.assertEqual(parse_pipeline_line("Stage1-RGB:  50%|#####     | 2500/5000"), ("nerf_stage1", 0.5))
 
