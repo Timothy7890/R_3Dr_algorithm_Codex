@@ -25,7 +25,7 @@ PLANT_YOLO_INI = {
     "yinxing": "20260323-yinxing.ini",  # Legacy API name.
     "ginkgo": "20260323-yinxing.ini",
     "tomato": "20260411-Tomato-006.ini",
-    "rapeseed": "20260526-rapeseed.ini",
+    "rapeseed": "903_YOLO26.ini",
     "tomato_new": "20261020-Tomato-CEN-fewshot.ini",
     # Reconstruction only: YOLO is skipped, so the ini is never read but --ini is still required.
     "other": DEFAULT_YOLO_INI,
