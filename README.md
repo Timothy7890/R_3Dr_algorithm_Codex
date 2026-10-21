@@ -170,6 +170,7 @@ ssh -N -p 30952 -L 127.0.0.1:14002:127.0.0.1:14000 -R 127.0.0.1:13001:127.0.0.1:
 - `eggplant`（茄子）→ `20261020-eggplant-class.ini`
 - `pepper`（辣椒）→ `20260720-lajiao.ini`
 - `rapeseed`（油菜）→ `20260526-rapeseed.ini`
+- `ginkgo`（银杏）→ `20260323-yinxing.ini`
 - `tomato_new`（番茄；原“番茄-新”）→ `20261020-Tomato-CEN-fewshot.ini`
 - `other`（其他植物，仅重建不分割）→ `--nerf-stage2-steps 0 --rgb-only --sfm-aabb-scale 16 --sfm-camera-aabb --nerf-export-subject-crop`（背景一起训练，训练区域用 `--sfm-aabb-scale 16`，其余作物为 4：归一化后相机距离为 1，aabb_scale 4 只覆盖约 2 倍相机距离，背景较远的场景（如整个房间）放不进去，模型会在每台相机前堆半透明雾去拟合画面；`--sfm-camera-aabb` 由相机外参求出位于环绕相机内部的立方体，写入 `transforms.json` 的 `export_aabb`，导出点云时只保留框内的点，总点数不变；`--sfm-normalize-camera-scale` 写入 `scale`/`offset`，使相机到注视点的平均距离统一为 1 个 NGP 单位，避免 Metashape 坐标偏大时相机贴到训练区域边界、背景放不下而满屏起雾；`--nerf-export-subject-crop` 在同一次导出里，于 `export_aabb` 粗裁之后、降采样之前找出水平支撑面（桌面/板面/地面）并去掉它及以下的点，再只保留离转轴最近的一团（植物+花盆），找不到时退回 `export_aabb` 裁剪结果，总点数不变；需要 PlantsegNeRF 包含 `RUN_pp/camera_aabb.py` 与 `scripts/export/subject_crop.py`），`--ignore` 增加 `yolo`；`--ini` 仍传 `903_YOLO26.ini`，但不会被读取
 

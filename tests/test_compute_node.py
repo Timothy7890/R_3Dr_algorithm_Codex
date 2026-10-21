@@ -50,6 +50,7 @@ class ComputeProcessorTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(yolo_ini(""), "903_YOLO26.ini")
         self.assertEqual(yolo_ini("lajiao"), "20260720-lajiao.ini")
         self.assertEqual(yolo_ini("yinxing"), "20260323-yinxing.ini")
+        self.assertEqual(yolo_ini("ginkgo"), "20260323-yinxing.ini")
         self.assertEqual(yolo_ini("tomato"), "20260411-Tomato-006.ini")
         with self.assertRaises(ValueError):
             yolo_ini("apple")
