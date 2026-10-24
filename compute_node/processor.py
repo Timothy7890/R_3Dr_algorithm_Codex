@@ -21,7 +21,7 @@ DEFAULT_YOLO_INI = "903_YOLO26.ini"
 PLANT_YOLO_INI = {
     "lajiao": "20260720-lajiao.ini",  # Legacy API name.
     "pepper": "20260720-lajiao.ini",
-    "eggplant": "20261020-eggplant-class.ini",
+    "eggplant": "20261024-CENCLASS-922.ini",
     "yinxing": "20260323-yinxing.ini",  # Legacy API name.
     "ginkgo": "20260323-yinxing.ini",
     "tomato": "20260411-Tomato-006.ini",
